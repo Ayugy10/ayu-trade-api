@@ -1,0 +1,8 @@
+{
+        "index": "NASDAQ",
+        "symbol": "AAPL",
+        "operation": "Buy",
+        "quantity": 20 ,
+        "price": 120,
+        "type": "equity"
+}

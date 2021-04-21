@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<configuration doc:name="Configuration" doc:id="276ff45e-a809-48b7-a93b-812dcd7f1058" defaultErrorHandler-ref="global-error-handler" />	
+	<http:listener-config name="ayu-trade-api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="c018e043-755f-4866-9916-0c04735e7d7d" file="config/${env}.properties" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="e352a37d-871d-4f04-9827-269e36071709" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="AbiJadon$414" database="ods"/>
+	</db:config>
+	
+	
+	
+	<sub-flow name="set-error-response-Sub_Flow" doc:id="f24f16d7-849b-4ebb-8dc4-a8cef1f0d599" >
+		<ee:transform doc:name="set error response" doc:id="d76eed9a-d7bf-4a88-87cd-2071091845a9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+"status": "failes",
+"errorType": "error.errorType",
+"errorDescription": "error.description"
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<error-handler name="global-error-handler" doc:id="8515d171-f57b-4464-8e68-60ecdfe8a0a0">
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8df58522-989f-4774-986f-4ea78d4451b7" type="ANY">
+			<flow-ref doc:name="set-error-response-Sub_Flow" doc:id="b13b90e4-eca5-4152-ba8a-11f1739a3611" name="set-error-response-Sub_Flow"/>
+		</on-error-propagate>
+	</error-handler>
+</mule>

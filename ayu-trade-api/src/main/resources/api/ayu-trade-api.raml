@@ -1,0 +1,22 @@
+#%RAML 1.0
+title: ayu-trade-api
+
+uses:
+  tradeTypes: library/tread-library.raml
+
+
+
+/trade:
+  post:
+    description: send trade data to respective team
+    body:
+      application/json:
+        type: tradeTypes.trade
+        example: !include examples/createTradeRequest.json
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/createTradeRespons.json
+             
+
