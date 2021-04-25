@@ -16,7 +16,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
     </http:listener-config>
 	<configuration-properties doc:name="Configuration properties" doc:id="c018e043-755f-4866-9916-0c04735e7d7d" file="config/${env}.properties" />
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="e352a37d-871d-4f04-9827-269e36071709" >
-		<db:my-sql-connection host="localhost" port="3306" user="root" password="AbiJadon$414" database="ods"/>
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${db.password}" database="${db.database}"/>
 	</db:config>
 	
 	
@@ -25,7 +25,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<ee:transform doc:name="set error response" doc:id="d76eed9a-d7bf-4a88-87cd-2071091845a9" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
 {
 "status": "failes",

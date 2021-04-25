@@ -23,16 +23,7 @@ output application/json
 VALUES
 (:Idex,:symbols,:operation,:quantity,:price)
 "]]></ee:set-variable>
-						<ee:set-variable variableName="sqlinputParams" ><![CDATA[%dw 2.0
-output application/json
----
-{
-	Idex: payload.Idex,
-	symbols: payload.symbols,
-	operation: payload.operation,
-	quantity: payload.quantity,
-	price: payload.price
-}]]></ee:set-variable>
+						<ee:set-variable resource="dw/mapTrade.dwl" variableName="sqlinputParams" />
 					</ee:variables>
 				</ee:transform>
 				<flow-ref doc:name="insert-to-db-sub_Flow" doc:id="9abee7f2-c037-4c13-b348-3076f2207d90" name="insert-to-db-sub_Flow"/>
@@ -61,16 +52,7 @@ output application/json
 VALUES
 (:Idex,:symbols,:operation,:quantity,:price)
 "]]></ee:set-variable>
-						<ee:set-variable variableName="sqlinputParams" ><![CDATA[%dw 2.0
-output application/json
----
-{
-	Idex: payload.Idex,
-	symbols: payload.symbols,
-	operation: payload.operation,
-	quantity: payload.quantity,
-	price: payload.price
-}]]></ee:set-variable>
+						<ee:set-variable resource="dw/mapTrade.dwl" variableName="sqlinputParams" />
 					</ee:variables>
 				</ee:transform>
 				<flow-ref doc:name="insert-to-db-sub_Flow" doc:id="70a81551-c66d-4529-b9b1-12bd98120508" name="insert-to-db-sub_Flow"/>
