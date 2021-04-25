@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="process-trades-to-ods-Sub_Flow" doc:id="384f9eb2-83b7-44aa-816d-9979df4a39b2" >
+		<logger level="INFO" doc:name="Logger" doc:id="581accdb-0e8d-4a97-a7da-f0794c2e77cf" message='#["request reseved to process trade to ODS, ++ correlationId:" ++ correlationId]'/>
+		<choice doc:name="Choice" doc:id="b3f4a7c9-a84c-409c-8eef-e613174b9ad8" >
+			<when expression='#[lower(payload."type") == "equity"]'>
+				<logger level="INFO" doc:name="EQUITY" doc:id="4ec22571-af3c-40e6-b71e-76ef3fa912e9" message='#["received equity trade to ODS, correlationId:" ++ correlationId]'/>
+				<ee:transform doc:name="set Vars" doc:id="06802527-5fbe-4114-9cda-9973746f4ce0" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="sqlQuery" ><![CDATA[%dw 2.0
+output application/json
+
+---
+"INSERT INTO `ods`.`equity`
+(Idex,symbols,operation,quantity,price)
+VALUES
+(:Idex,:symbols,:operation,:quantity,:price)
+"]]></ee:set-variable>
+						<ee:set-variable resource="dw/mapTrade.dwl" variableName="sqlinputParams" />
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="insert-to-db-sub_Flow" doc:id="9abee7f2-c037-4c13-b348-3076f2207d90" name="insert-to-db-sub_Flow"/>
+				<ee:transform doc:name="set responce" doc:id="3ec0695d-f300-4cd1-9fc9-b437e6743566" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+"status": "equity ODS trade processed successfully"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[lower(payload."type") == "fx"]'>
+				<logger level="INFO" doc:name="FX" doc:id="e40831c0-232f-478f-87b9-c5bed0aa0036" message='#["received FX trade to ODS, correlationId:" ++ correlationId]'/>
+				<ee:transform doc:name="set Vars" doc:id="5a9638c4-1ef7-426d-a5b9-e0443332cf07" >
+					<ee:message >
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="sqlQuery" ><![CDATA[%dw 2.0
+output application/json
+---
+"INSERT INTO `ods`.`fx`
+(Idex,symbols,operation,quantity,price)
+VALUES
+(:Idex,:symbols,:operation,:quantity,:price)
+"]]></ee:set-variable>
+						<ee:set-variable resource="dw/mapTrade.dwl" variableName="sqlinputParams" />
+					</ee:variables>
+				</ee:transform>
+				<flow-ref doc:name="insert-to-db-sub_Flow" doc:id="70a81551-c66d-4529-b9b1-12bd98120508" name="insert-to-db-sub_Flow"/>
+				<ee:transform doc:name="set responce" doc:id="8c244707-5b77-4624-ba01-bbc6d7596b54" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+"status": "fx ODS trade processed successfully"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="1c5d1214-3f44-4943-8ad4-7f52aa88055c" message='#["received invalid trade to ODS, correlationId:" ++ correlationId]'/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="insert-to-db-sub_Flow" doc:id="91fbee96-3df3-46eb-aca6-7f2e393cb978" >
+		<logger level="INFO" doc:name="Logger" doc:id="dc7cf31f-bdfe-4f1f-9508-111c2ca77514" message="read to insert into db"/>
+		<db:insert doc:name="Insert" doc:id="d5b8bf75-e840-4d76-8b00-2c477ddb79f8" config-ref="Database_Config">
+			<db:sql ><![CDATA[#[vars.sqlQuery]]]></db:sql>
+			<db:input-parameters ><![CDATA[#[vars.sqlinputParams]]]></db:input-parameters>
+		</db:insert>
+		<logger level="INFO" doc:name="Logger" doc:id="0e5925fa-c3a6-4de5-bc1c-63c69771960c" message="record inserted into db"/>
+	</sub-flow>
+</mule>
